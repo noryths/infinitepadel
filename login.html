@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Infinite Padel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --padel-blue: #0077b6; --padel-light: #00b4d8; --dark-blue: #03045e; --white: #ffffff; --bg-gray: #f4f6f8; --neon-red: #ff003c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-gray); color: #333; opacity: 0; animation: fadeInPage 0.5s ease-out forwards; display: flex; flex-direction: column; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+        @keyframes fadeInPage { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        body.fade-out { opacity: 0; transform: translateY(-15px); transition: opacity 0.4s ease-in, transform 0.4s ease-in; }
+
+        nav { display: flex; justify-content: center; align-items: center; background-color: var(--dark-blue); padding: 10px 50px; color: var(--white); box-shadow: 0 4px 10px rgba(0,0,0,0.1); gap: 50px; position: relative; z-index: 1000;}
+        .nav-side { display: flex; align-items: center; gap: 30px; font-weight: 700; text-transform: uppercase; font-size: 1rem; }
+        .nav-side a:hover { color: var(--padel-light); transition: 0.3s; }
+        .logo img { height: 90px; transition: transform 0.3s; cursor: pointer; }
+        .logo img:hover { transform: scale(1.05); }
+
+        /* PROFILO UTENTE E CARRELLO */
+        .icon-btn { display: flex; align-items: center; justify-content: center; position: relative; padding: 8px; border-radius: 50%; background: var(--padel-blue); transition: 0.3s; }
+        .icon-btn svg { width: 24px; height: 24px; fill: var(--white); }
+        
+        .profile-container { position: relative; display: inline-block; }
+        .profile-dropdown { position: absolute; top: 120%; right: 0; background: var(--white); color: var(--dark-blue); min-width: 220px; padding: 20px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; gap: 10px; z-index: 2000; cursor: default; text-transform: none;}
+        .profile-container:hover .profile-dropdown { display: flex; }
+        .profile-dropdown p { margin: 0; font-size: 0.95rem; }
+        .profile-dropdown strong { color: var(--padel-blue); }
+        .logout-btn { background: var(--neon-red); color: var(--white); border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-top: 10px; transition: 0.3s;}
+        .logout-btn:hover { background: #cc0030; }
+
+        .auth-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+        .auth-box { background: var(--white); width: 100%; max-width: 500px; border-radius: 20px; padding: 40px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+        .auth-form { display: none; animation: fadeInPage 0.4s; }
+        .auth-form.active { display: block; }
+        .auth-box h2 { color: var(--dark-blue); font-size: 2.2rem; margin-bottom: 30px; text-align: center; text-transform: uppercase; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-group input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 1rem; font-family: inherit; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--padel-blue); outline: none; }
+        .form-row { display: flex; gap: 15px; }
+        
+        .auth-btn { width: 100%; background: var(--padel-blue); color: var(--white); border: none; padding: 15px; border-radius: 10px; font-size: 1.2rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,119,182,0.3); }
+        .auth-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,119,182,0.5); background: var(--dark-blue); }
+        .switch-mode { text-align: center; margin-top: 25px; font-size: 0.95rem; color: #666; }
+        .switch-mode span { color: var(--neon-red); font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .switch-mode span:hover { color: #cc0030; text-decoration: underline; }
+        .error-msg { color: var(--neon-red); font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-side">
+            <a href="index.html">Home</a>
+            <a href="prodotti.html">Prodotti</a>
+        </div>
+        <div class="logo"><a href="index.html"><img src="logononaggiustato-removebg-preview.png" alt="Logo"></a></div>
+        <div class="nav-side">
+            <a href="chisiamo.html">Chi Siamo</a>
+            <a href="contatti.html">Contatti</a>
+            
+            <div class="profile-container">
+                <a href="login.html" class="icon-btn" id="profile-link" title="Area Personale">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </a>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <!-- JS Inietta i dati -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-box">
+            <!-- LOGIN -->
+            <div id="login-form" class="auth-form active">
+                <h2>Login</h2>
+                <div class="error-msg" id="login-error">Nome utente o password errati.</div>
+                <div class="input-group"><input type="text" id="log-user" placeholder="Nome Utente" required></div>
+                <div class="input-group"><input type="password" id="log-pass" placeholder="Password" required></div>
+                <button class="auth-btn" onclick="doLogin()">Accedi</button>
+                <div class="switch-mode">Non hai un account? <span onclick="switchForm('register')">Crea un account</span></div>
+            </div>
+
+            <!-- REGISTRAZIONE CON NOME E COGNOME -->
+            <div id="register-form" class="auth-form">
+                <h2>Crea Account</h2>
+                <div class="error-msg" id="reg-error">Errore di registrazione.</div>
+                
+                <div class="form-row">
+                    <div class="input-group" style="width: 50%;"><input type="text" id="reg-nome" placeholder="Nome" required></div>
+                    <div class="input-group" style="width: 50%;"><input type="text" id="reg-cognome" placeholder="Cognome" required></div>
+                </div>
+                <div class="input-group"><input type="text" id="reg-user" placeholder="Nome Utente" required></div>
+                <div class="input-group"><input type="email" id="reg-email" placeholder="Indirizzo Email" required></div>
+                <div class="input-group"><input type="password" id="reg-pass" placeholder="Password" required></div>
+                
+                <button class="auth-btn" onclick="doRegister()">Registrati</button>
+                <div class="switch-mode">Hai già un account? <span onclick="switchForm('login')">Accedi</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inizializza Admin con Nome e Cognome
+            let usersDB = JSON.parse(localStorage.getItem('infinite_users_db')) || [];
+            if (!usersDB.some(u => u.username === 'admin321')) {
+                usersDB.push({ nome: 'Il', cognome: 'Capo', username: 'admin321', email: 'capo@infinitepadel.it', password: 'admin123' });
+                localStorage.setItem('infinite_users_db', JSON.stringify(usersDB));
+            }
+            
+            checkProfile(); // Aggiorna il menu a tendina dell'omino
+
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.href && !this.href.includes('#') && !this.classList.contains('logout-btn')) {
+                        e.preventDefault();
+                        document.body.classList.add('fade-out');
+                        setTimeout(() => window.location.href = this.href, 400);
+                    }
+                });
+            });
+        });
+
+        // GESTIONE PROFILO A TENDINA
+        function checkProfile() {
+            const loggedInUser = localStorage.getItem('infinite_logged_in');
+            const dropdown = document.getElementById('profile-dropdown');
+            const profileLink = document.getElementById('profile-link');
+
+            if(loggedInUser) {
+                profileLink.href = "javascript:void(0)"; // Disabilita il link al login se sei già loggato
+                let usersDB = JSON.parse(localStorage.getItem('infinite_users_db')) || [];
+                let u = usersDB.find(x => x.username === loggedInUser);
+                if(u) {
+                    dropdown.innerHTML = `
+                        <p>Nome: <strong>${u.nome}</strong></p>
+                        <p>Cognome: <strong>${u.cognome}</strong></p>
+                        <p>Utente: <strong>${u.username}</strong></p>
+                        <button class="logout-btn" onclick="doLogout()">Disconnetti</button>
+                    `;
+                }
+            } else {
+                dropdown.innerHTML = `
+                    <p style="text-align:center; font-size:1rem; margin-bottom:10px;">Non sei connesso</p>
+                    <a href="login.html" style="background:var(--padel-blue); color:white; padding:10px; text-align:center; border-radius:5px; font-weight:bold; font-size:0.9rem;">Accedi ora</a>
+                `;
+            }
+        }
+
+        function doLogout() {
+            localStorage.removeItem('infinite_logged_in');
+            window.location.reload();
+        }
+
+        function switchForm(formType) {
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('reg-error').style.display = 'none';
+            if(formType === 'register') {
+                document.getElementById('login-form').classList.remove('active');
+                document.getElementById('register-form').classList.add('active');
+            } else {
+                document.getElementById('register-form').classList.remove('active');
+                document.getElementById('login-form').classList.add('active');
+            }
+        }
+
+        function doRegister() {
+            const nome = document.getElementById('reg-nome').value.trim();
+            const cognome = document.getElementById('reg-cognome').value.trim();
+            const user = document.getElementById('reg-user').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+            const errorBox = document.getElementById('reg-error');
+
+            if(!nome || !cognome || !user || !email || !pass) { errorBox.innerText = "Compila tutti i campi!"; errorBox.style.display = 'block'; return; }
+
+            let usersDB = JSON.parse(localStorage.getItem('infinite_users_db')) || [];
+            if(usersDB.some(u => u.username === user)) { errorBox.innerText = "Nome utente già in uso."; errorBox.style.display = 'block'; return; }
+
+            usersDB.push({ nome: nome, cognome: cognome, username: user, email: email, password: pass });
+            localStorage.setItem('infinite_users_db', JSON.stringify(usersDB));
+            
+            localStorage.setItem('infinite_logged_in', user);
+            alert("Account creato con successo!");
+            window.location.href = 'index.html';
+        }
+
+        function doLogin() {
+            const user = document.getElementById('log-user').value.trim();
+            const pass = document.getElementById('log-pass').value.trim();
+            const errorBox = document.getElementById('login-error');
+
+            if(!user || !pass) { errorBox.innerText = "Inserisci nome utente e password."; errorBox.style.display = 'block'; return; }
+
+            let usersDB = JSON.parse(localStorage.getItem('infinite_users_db')) || [];
+            const validUser = usersDB.find(u => u.username === user && u.password === pass);
+
+            if(validUser) {
+                localStorage.setItem('infinite_logged_in', user);
+                if(user === 'admin321') { localStorage.setItem('show_admin_greeting', 'true'); }
+                window.location.href = 'index.html';
+            } else {
+                errorBox.innerText = "Nome utente o password errati.";
+                errorBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

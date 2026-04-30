@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prodotti | Infinite Padel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ================= VARIABILI E RESET ================= */
+        :root { --padel-blue: #0077b6; --padel-light: #00b4d8; --dark-blue: #03045e; --white: #ffffff; --bg-gray: #f4f6f8; --neon-red: #ff003c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-gray); color: #333; overflow-x: hidden; opacity: 0; animation: fadeInPage 0.5s ease-out forwards; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        @keyframes fadeInPage { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        body.fade-out { opacity: 0; transform: translateY(-15px); transition: opacity 0.4s ease-in, transform 0.4s ease-in; }
+
+        /* ================= NAVBAR ================= */
+        nav { display: flex; justify-content: center; align-items: center; background-color: var(--dark-blue); padding: 10px 50px; color: var(--white); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); gap: 50px; }
+        .nav-side { display: flex; align-items: center; gap: 30px; font-weight: 700; text-transform: uppercase; font-size: 1rem; }
+        .nav-side a:hover { color: var(--padel-light); transition: 0.3s; }
+        .logo img { height: 90px; transition: transform 0.3s; cursor: pointer; }
+        .logo img:hover { transform: scale(1.05); }
+        .icon-btn { display: flex; align-items: center; justify-content: center; position: relative; padding: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: 0.3s;}
+        .icon-btn:hover { background: var(--padel-blue); }
+        .icon-btn svg { width: 24px; height: 24px; fill: var(--white); }
+        .cart-badge { position: absolute; top: -5px; right: -5px; background: var(--neon-red); color: var(--white); font-size: 0.7rem; font-weight: 900; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+        /* ================= VISTA CATEGORIE ================= */
+        #categories-view { min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; }
+        .section-title { text-align: center; margin-bottom: 50px; font-size: 3rem; color: var(--dark-blue); text-transform: uppercase; }
+        .cards-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 40px; width: 90vw; max-width: 1600px; perspective: 1200px; }
+        .card-wrapper:nth-child(1) { grid-column: 1 / span 2; }
+        .card-wrapper:nth-child(2) { grid-column: 3 / span 2; }
+        .card-wrapper:nth-child(3) { grid-column: 5 / span 2; }
+        .card-wrapper:nth-child(4) { grid-column: 2 / span 2; }
+        .card-wrapper:nth-child(5) { grid-column: 4 / span 2; }
+        .category-card { background: linear-gradient(145deg, #ffffff, #e6e6e6); border-radius: 25px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 15px 40px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.1s ease-out; transform-style: preserve-3d; border: 3px solid transparent; }
+        .card-wrapper:hover .category-card { border-color: var(--padel-light); box-shadow: 0 30px 60px rgba(0,119,182,0.3); }
+        .category-card img { width: 200px; height: 200px; object-fit: contain; transform: translateZ(60px); transition: transform 0.3s ease; }
+        .card-wrapper:hover .category-card img { transform: translateZ(100px) scale(1.15); }
+        .category-card h3 { margin-top: 30px; font-size: 2.2rem; color: var(--dark-blue); text-transform: uppercase; transform: translateZ(40px); }
+
+        /* ================= VISTA CATALOGO E PRODOTTI ================= */
+        #catalog-view { display: none; padding: 20px 50px; animation: fadeInPage 0.5s ease; }
+        .back-btn { display: inline-block; padding: 10px 20px; background: var(--dark-blue); color: var(--white); border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 20px; text-transform: uppercase; transition: 0.3s; }
+        .back-btn:hover { background: var(--padel-blue); }
+        .catalog-container { display: flex; gap: 30px; }
+        .sidebar-filters { width: 25%; background: var(--white); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: sticky; top: 130px; height: fit-content; }
+        .sidebar-filters h3 { color: var(--dark-blue); margin-bottom: 20px; font-size: 1.5rem; border-bottom: 2px solid var(--padel-light); padding-bottom: 10px;}
+        .filter-group { margin-bottom: 20px; }
+        .checkbox-label { display: block; margin-bottom: 8px; font-size: 0.9rem; cursor: pointer; }
+        .main-products { width: 75%; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; align-content: start;}
+        .product-item { background: var(--white); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; }
+        .product-item:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .product-item img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; }
+        .product-item h4 { font-size: 1.1rem; color: var(--dark-blue); }
+        .product-item .price { color: var(--padel-blue); font-weight: 900; font-size: 1.2rem; margin-top: 10px; }
+
+        /* ================= MODALE PRODOTTO ================= */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--white); display: none; align-items: start; justify-content: start; z-index: 2000; overflow-y: auto; opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; transform: translateY(100vh); }
+        .modal-overlay.active { display: block; opacity: 1; transform: translateY(0); }
+        .product-modal { width: 100%; height: 100%; display: flex; }
+        .close-btn { position: fixed; top: 20px; right: 20px; font-size: 1.8rem; cursor: pointer; font-weight: bold; color: var(--dark-blue); background: rgba(255, 255, 255, 0.9); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 50%; z-index: 2100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .close-btn:hover { color: var(--neon-red); transform: scale(1.1); }
+        
+        .modal-img-container { width: 50%; height: 100%; padding: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: zoom-in; position: relative; }
+        .modal-img-container img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s ease-out; transform-origin: center center; }
+        .modal-img-container:hover img { transform: scale(2.5); }
+        
+        .modal-details { width: 50%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 50px; }
+        .modal-details h2 { color: var(--dark-blue); font-size: 3rem; margin-bottom: 10px; text-transform: uppercase; }
+        .modal-details .price { color: var(--padel-blue); font-size: 2.5rem; font-weight: 900; margin-bottom: 20px; }
+        .specs-list { list-style: none; margin-bottom: 30px; font-size: 1.1rem; }
+        .specs-list li { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .add-to-cart-btn { background: var(--neon-red); color: var(--white); border: none; padding: 20px; border-radius: 8px; font-size: 1.4rem; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,60,0.4); width: 100%; margin-top: 20px;}
+        .add-to-cart-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,0,60,0.6); }
+
+        /* ================= POP-UP CROSS-SELL DINAMICO ================= */
+        .cross-sell-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 3000; opacity: 0; transition: opacity 0.4s; }
+        .cross-sell-overlay.active { display: flex; opacity: 1; }
+        .cross-sell-box { background: linear-gradient(135deg, rgba(255,0,60,0.95), rgba(130,0,30,0.95)); border-radius: 20px; width: 650px; padding: 40px; text-align: center; color: var(--white); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .cs-close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; }
+        .cs-items { display: flex; justify-content: center; gap: 30px; margin: 25px 0; }
+        .cs-item { background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; width: 200px; display: flex; flex-direction: column; align-items: center; }
+        .cs-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; }
+        .cs-checkbox-label { display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; font-weight: bold; background: rgba(0,0,0,0.2); padding: 8px 15px; border-radius: 5px; width: 100%; justify-content: center; transition: 0.2s;}
+        .cs-checkbox-label:hover { background: rgba(0,0,0,0.4); }
+        .cs-checkbox-label input { width: 18px; height: 18px; cursor: pointer; }
+        .accept-offer-btn { background: var(--white); color: var(--neon-red); border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 10px;}
+        .accept-offer-btn:hover { transform: scale(1.02); }
+        .btn-gold { background: #ffd700; color: #000; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .btn-gold:hover { background: #ffea00; box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+        .go-cart-btn { margin-top:15px; cursor:pointer; text-decoration:underline; font-size:0.95rem; font-weight:bold; display: inline-block;}
+        .go-cart-btn:hover { color: var(--padel-light); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-side">
+            <a href="index.html">Home</a>
+            <a href="prodotti.html" style="color: var(--padel-light);">Prodotti</a>
+        </div>
+        <div class="logo">
+            <a href="index.html"><img src="logononaggiustato-removebg-preview.png" alt="Logo"></a>
+        </div>
+        <div class="nav-side">
+            <a href="chisiamo.html">Chi Siamo</a>
+            <a href="contatti.html">Contatti</a>
+            
+            <!-- Icona Utente -->
+            <a href="login.html" class="icon-btn" title="Area Personale">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </a>
+
+            <!-- Icona Carrello -->
+            <a href="carrello.html" class="icon-btn" title="Vai al Carrello">
+                <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <span class="cart-badge" id="badge-count">0</span>
+            </a>
+        </div>
+    </nav>
+
+    <div id="categories-view">
+        <h2 class="section-title">Scegli la tua categoria</h2>
+        <div class="cards-grid">
+            <div class="card-wrapper" onclick="openCategory('Racchette')"><div class="category-card"><img src="racchetta.png" alt="Racchette"><h3>Racchette</h3></div></div>
+            <div class="card-wrapper" onclick="openCategory('Palline')"><div class="category-card"><img src="palline.png" alt="Palline"><h3>Palline</h3></div></div>
+            <div class="card-wrapper" onclick="openCategory('Grip')"><div class="category-card"><img src="overgrip.png" alt="Grip"><h3>Grip</h3></div></div>
+            <div class="card-wrapper" onclick="openCategory('Vestiti')"><div class="category-card"><img src="vestiti.png" alt="Vestiti"><h3>Vestiti</h3></div></div>
+            <div class="card-wrapper" onclick="openCategory('Borse')"><div class="category-card"><img src="borsa.png" alt="Borse"><h3>Borse</h3></div></div>
+        </div>
+    </div>
+
+    <div id="catalog-view">
+        <div class="back-btn" onclick="backToCategories()">← Torna alle Categorie</div>
+        <h2 class="section-title" id="catalog-title">Categoria</h2>
+        <div class="catalog-container">
+            <aside class="sidebar-filters">
+                <h3>Filtra</h3>
+                <div class="filter-group"><h4 style="color:var(--padel-blue); margin-bottom:10px;">Marca</h4><label class="checkbox-label"><input type="checkbox"> Bullpadel</label><label class="checkbox-label"><input type="checkbox"> Head</label><label class="checkbox-label"><input type="checkbox"> Babolat</label></div>
+            </aside>
+            <div class="main-products" id="product-grid">
+                <div class="product-item" data-category="Racchette" onclick="openProductModal('Pala Infinite Pro', 'racchetta.png', '249.99', 'racchetta')">
+                    <img src="racchetta.png"><h4>Pala Infinite Pro</h4><p class="price">€ 249.99</p>
+                </div>
+                <div class="product-item" data-category="Racchette" onclick="openProductModal('Pala Attack Carbon', 'racchetta1.png', '210.00', 'racchetta')">
+                    <img src="racchetta1.png"><h4>Pala Attack Carbon</h4><p class="price">€ 210.00</p>
+                </div>
+                <div class="product-item" data-category="Racchette" onclick="openProductModal('Pala Control Lite', 'racchetta2.png', '185.00', 'racchetta')">
+                    <img src="racchetta2.png"><h4>Pala Control Lite</h4><p class="price">€ 185.00</p>
+                </div>
+                <div class="product-item" data-category="Borse" onclick="openProductModal('Paletero Tour 50L', 'borsa.png', '85.00', 'borsa')">
+                    <img src="borsa.png"><h4>Paletero Tour 50L</h4><p class="price">€ 85.00</p>
+                </div>
+                <div class="product-item" data-category="Borse" onclick="openProductModal('Zaino Padel Pro', 'borsa1.png', '55.00', 'borsa')">
+                    <img src="borsa1.png"><h4>Zaino Padel Pro</h4><p class="price">€ 55.00</p>
+                </div>
+                <div class="product-item" data-category="Borse" onclick="openProductModal('Paletero Compact', 'borsa2.png', '65.00', 'borsa')">
+                    <img src="borsa2.png"><h4>Paletero Compact</h4><p class="price">€ 65.00</p>
+                </div>
+                <div class="product-item" data-category="Palline" onclick="openProductModal('Tubo Master', 'palline.png', '6.50', 'palline')">
+                    <img src="palline.png"><h4>Tubo Master</h4><p class="price">€ 6.50</p>
+                </div>
+                <div class="product-item" data-category="Grip" onclick="openProductModal('Overgrip Comfort', 'overgrip.png', '8.50', 'grip')">
+                    <img src="overgrip.png"><h4>Overgrip Comfort</h4><p class="price">€ 8.50</p>
+                </div>
+                <div class="product-item" data-category="Vestiti" onclick="openProductModal('Completo Infinite', 'vestiti.png', '45.00', 'vestiti')">
+                    <img src="vestiti.png"><h4>Completo Infinite</h4><p class="price">€ 45.00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE PRODOTTO -->
+    <div class="modal-overlay" id="productModal">
+        <span class="close-btn" onclick="closeModal()">✕</span>
+        <div class="product-modal">
+            <div class="modal-img-container" id="zoomContainer"><img id="modalImg" src="racchetta.png" alt=""></div>
+            <div class="modal-details">
+                <h2 id="modalTitle">Nome Prodotto</h2>
+                <div class="price">€ <span id="modalPrice">0.00</span></div>
+                <ul class="specs-list" id="modalSpecs"></ul>
+                <button class="add-to-cart-btn" id="addToCartBtn">Aggiungi al Carrello</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CROSS SELL POPUP DINAMICO -->
+    <div class="cross-sell-overlay" id="crossSellPopup">
+        <div class="cross-sell-box">
+            <span class="cs-close-btn" onclick="closeCrossSell()">✕</span>
+            <h2>Fermati un attimo!</h2>
+            <p id="cs-desc">...</p>
+            
+            <div class="cs-items" id="cs-items-container"></div>
+            <div id="cs-actions"></div>
+
+            <span class="go-cart-btn" onclick="goToCart()">No grazie, vai al carrello</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartBadge();
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.href && !this.href.includes('#') && this.target !== '_blank') {
+                        e.preventDefault();
+                        document.body.classList.add('fade-out');
+                        setTimeout(() => window.location.href = this.href, 400);
+                    }
+                });
+            });
+        });
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('infinite_cart')) || [];
+            document.getElementById('badge-count').innerText = cart.length;
+        }
+
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const rotateX = (((e.clientY - rect.top) - (rect.height / 2)) / (rect.height / 2)) * -10; 
+                const rotateY = (((e.clientX - rect.left) - (rect.width / 2)) / (rect.width / 2)) * 10;
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', () => card.style.transform = `rotateX(0deg) rotateY(0deg) scale(1)`);
+        });
+
+        function openCategory(cat) {
+            document.getElementById('categories-view').style.display = 'none';
+            document.getElementById('catalog-title').innerText = cat;
+            const catView = document.getElementById('catalog-view');
+            catView.style.display = 'block';
+            catView.style.animation = 'none'; catView.offsetHeight; catView.style.animation = 'fadeInPage 0.5s ease';
+            document.querySelectorAll('.product-item').forEach(p => p.style.display = (p.getAttribute('data-category') === cat) ? 'block' : 'none');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+        function backToCategories() {
+            document.getElementById('catalog-view').style.display = 'none';
+            document.getElementById('categories-view').style.display = 'flex';
+        }
+
+        let currentProd = {};
+        function openProductModal(name, img, price, type) {
+            document.getElementById('modalTitle').innerText = name;
+            document.getElementById('modalImg').src = img;
+            document.getElementById('modalImg').style.transformOrigin = 'center center';
+            document.getElementById('modalPrice').innerText = price;
+            currentProd = {name: name, img: img, price: parseFloat(price), type: type};
+            
+            const specs = document.getElementById('modalSpecs');
+            if(type==='racchetta') specs.innerHTML = `<li><strong>Forma:</strong> Goccia</li><li><strong>Peso:</strong> 365g</li>`;
+            else if(type==='borsa') specs.innerHTML = `<li><strong>Volume:</strong> 50L</li>`;
+            else specs.innerHTML = `<li><strong>Dettaglio:</strong> Prodotto Ufficiale</li>`;
+            
+            document.getElementById('productModal').classList.add('active');
+        }
+        function closeModal() { document.getElementById('productModal').classList.remove('active'); }
+
+        const zoomCont = document.getElementById('zoomContainer');
+        const zoomImg = document.getElementById('modalImg');
+        zoomCont.addEventListener('mousemove', e => {
+            const rect = zoomCont.getBoundingClientRect();
+            zoomImg.style.transformOrigin = `${((e.clientX - rect.left)/rect.width)*100}% ${((e.clientY - rect.top)/rect.height)*100}%`;
+        });
+        zoomCont.addEventListener('mouseleave', () => zoomImg.style.transformOrigin = 'center center');
+
+        // --- BLOCCO LOGIN E POPUP OFFERTE ---
+        let currentOfferType = '';
+
+        function showCrossSell(type) {
+            currentOfferType = type;
+            const desc = document.getElementById('cs-desc');
+            const items = document.getElementById('cs-items-container');
+            const actions = document.getElementById('cs-actions');
+
+            if(type === 'racchetta') {
+                desc.innerHTML = `Scegli cosa aggiungere per ottenere il tuo sconto!`;
+                items.innerHTML = `
+                    <div class="cs-item">
+                        <img src="overgrip.png"><strong>Overgrip (+€8.50)</strong>
+                        <label class="cs-checkbox-label"><input type="checkbox" id="chk-grip" value="grip"> Aggiungi</label>
+                    </div>
+                    <div class="cs-item">
+                        <img src="borsa.png"><strong>Paletero (+€85.00)</strong>
+                        <label class="cs-checkbox-label"><input type="checkbox" id="chk-borsa" value="borsa"> Aggiungi</label>
+                    </div>`;
+                actions.innerHTML = `
+                    <button class="accept-offer-btn btn-gold" onclick="acceptBothOffers()">Aggiungi Entrambi (Extra 2% Sconto!)</button>
+                    <button class="accept-offer-btn" onclick="acceptSelectedOffers()">Aggiungi Selezionati (10% Sconto)</button>`;
+            } else if (type === 'grip') {
+                desc.innerHTML = `Aggiungi un tubo di <strong>Palline</strong> per avere il <strong>5% DI SCONTO</strong> su tutto!`;
+                items.innerHTML = `<div class="cs-item"><img src="palline.png"><strong>Tubo Palline</strong></div>`;
+                actions.innerHTML = `<button class="accept-offer-btn" onclick="acceptSingleOffer('palline')">Aggiungi e Sconta</button>`;
+            } else if (type === 'vestiti') {
+                desc.innerHTML = `Aggiungi uno <strong>Zaino</strong> per avere il <strong>3% DI SCONTO</strong> su tutto!`;
+                items.innerHTML = `<div class="cs-item"><img src="borsa1.png"><strong>Zaino Padel</strong></div>`;
+                actions.innerHTML = `<button class="accept-offer-btn" onclick="acceptSingleOffer('borsa')">Aggiungi e Sconta</button>`;
+            }
+
+            setTimeout(() => document.getElementById('crossSellPopup').classList.add('active'), 300);
+        }
+
+        document.getElementById('addToCartBtn').addEventListener('click', () => {
+            // CONTROLLO DI SICUREZZA: SE NON LOGGATO BLOCCA
+            const loggedInUser = localStorage.getItem('infinite_logged_in');
+            if(!loggedInUser) {
+                alert("Attenzione! Devi prima Accedere o Creare un Account per poter acquistare i nostri prodotti.");
+                document.body.classList.add('fade-out');
+                setTimeout(() => window.location.href = 'login.html', 400);
+                return; 
+            }
+
+            let cart = JSON.parse(localStorage.getItem('infinite_cart')) || [];
+            cart.push(currentProd);
+            localStorage.setItem('infinite_cart', JSON.stringify(cart));
+            updateCartBadge();
+            closeModal();
+            
+            if(currentProd.type === 'racchetta' || currentProd.type === 'grip' || currentProd.type === 'vestiti') {
+                showCrossSell(currentProd.type);
+            } else {
+                alert('Prodotto aggiunto al carrello!');
+            }
+        });
+
+        function closeCrossSell() { document.getElementById('crossSellPopup').classList.remove('active'); }
+        function goToCart() { closeCrossSell(); document.body.classList.add('fade-out'); setTimeout(() => window.location.href = 'carrello.html', 400); }
+
+        function acceptBothOffers() {
+            let cart = JSON.parse(localStorage.getItem('infinite_cart')) || [];
+            cart.push({ name: 'Overgrip Comfort', img: 'overgrip.png', price: 8.50, type: 'grip' });
+            cart.push({ name: 'Paletero Tour 50L', img: 'borsa.png', price: 85.00, type: 'borsa' });
+            localStorage.setItem('infinite_cart', JSON.stringify(cart));
+            goToCart();
+        }
+
+        function acceptSelectedOffers() {
+            let cart = JSON.parse(localStorage.getItem('infinite_cart')) || [];
+            let chkGrip = document.getElementById('chk-grip');
+            let chkBorsa = document.getElementById('chk-borsa');
+            let added = false;
+
+            if(chkGrip && chkGrip.checked) { cart.push({ name: 'Overgrip Comfort', img: 'overgrip.png', price: 8.50, type: 'grip' }); added = true; }
+            if(chkBorsa && chkBorsa.checked) { cart.push({ name: 'Paletero Tour 50L', img: 'borsa.png', price: 85.00, type: 'borsa' }); added = true; }
+
+            if(added) { localStorage.setItem('infinite_cart', JSON.stringify(cart)); goToCart(); } 
+            else { alert("Non hai selezionato nulla! Scegli almeno un prodotto o clicca su 'No grazie'."); }
+        }
+
+        function acceptSingleOffer(typeToAdd) {
+            let cart = JSON.parse(localStorage.getItem('infinite_cart')) || [];
+            if (typeToAdd === 'palline') { cart.push({ name: 'Tubo Master', img: 'palline.png', price: 6.50, type: 'palline' }); } 
+            else if (typeToAdd === 'borsa') { cart.push({ name: 'Zaino Padel Pro', img: 'borsa1.png', price: 55.00, type: 'borsa' }); }
+            localStorage.setItem('infinite_cart', JSON.stringify(cart));
+            goToCart();
+        }
+    </script>
+</body>
+</html>

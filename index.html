@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Padel | Lo shop per i veri padelisti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ================= VARIABILI E RESET ================= */
+        :root { --padel-blue: #0077b6; --padel-light: #00b4d8; --dark-blue: #03045e; --white: #ffffff; --bg-gray: #f4f6f8; --neon-red: #ff003c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        html { scroll-behavior: smooth; } /* Scorrimento fluido per i link interni */
+        body { background-color: var(--bg-gray); color: #333; overflow-x: hidden; opacity: 0; animation: fadeInPage 0.5s ease-out forwards; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        @keyframes fadeInPage { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        body.fade-out { opacity: 0; transform: translateY(-15px); transition: opacity 0.4s ease-in, transform 0.4s ease-in; }
+
+        /* ================= NAVBAR ================= */
+        nav { display: flex; justify-content: center; align-items: center; background-color: var(--dark-blue); padding: 10px 50px; color: var(--white); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); gap: 50px; }
+        .nav-side { display: flex; align-items: center; gap: 30px; font-weight: 700; text-transform: uppercase; font-size: 1rem; }
+        .nav-side a { transition: 0.3s; }
+        .nav-side a:hover { color: var(--padel-light); }
+        .logo img { height: 90px; transition: transform 0.3s; cursor: pointer; }
+        .logo img:hover { transform: scale(1.05); }
+
+        .icon-btn { display: flex; align-items: center; justify-content: center; position: relative; padding: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: 0.3s; }
+        .icon-btn:hover { background: var(--padel-blue); }
+        .icon-btn svg { width: 24px; height: 24px; fill: var(--white); }
+        .cart-badge { position: absolute; top: -5px; right: -5px; background: var(--neon-red); color: var(--white); font-size: 0.7rem; font-weight: 900; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+        /* ================= TENDINA PROFILO ================= */
+        .profile-container { position: relative; display: inline-block; }
+        .profile-dropdown { position: absolute; top: 120%; left: 0; background: var(--white); color: var(--dark-blue); min-width: 220px; padding: 20px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 10px; z-index: 2000; cursor: default; text-transform: none; opacity: 0; visibility: hidden; transition: opacity 0.3s ease 4s, visibility 0s linear 4.3s; }
+        .profile-container:hover .profile-dropdown { opacity: 1; visibility: visible; transition: opacity 0.3s ease 0s, visibility 0s linear 0s; }
+        .profile-dropdown p { margin: 0; font-size: 0.95rem; }
+        .profile-dropdown strong { color: var(--padel-blue); }
+        .logout-btn { background: var(--neon-red); color: var(--white); border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-top: 10px; transition: 0.3s;}
+        .logout-btn:hover { background: #cc0030; }
+
+        /* ================= MODALE DISCONNESSIONE ================= */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 3000; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .confirm-box { background: var(--white); border-radius: 15px; width: 450px; max-width: 90%; padding: 40px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.active .confirm-box { transform: scale(1); }
+        .confirm-box h2 { color: var(--dark-blue); font-size: 2rem; margin-bottom: 15px; }
+        .confirm-box p { font-size: 1.1rem; color: #555; margin-bottom: 30px; }
+        .btn-group { display: flex; justify-content: center; gap: 20px; }
+        .btn-yes { background: var(--neon-red); color: var(--white); border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-yes:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(255,0,60,0.4); }
+        .btn-no { background: var(--bg-gray); color: var(--dark-blue); border: 2px solid #ddd; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-no:hover { background: #eef9ff; border-color: var(--padel-blue); }
+
+        /* ================= ANIMAZIONE ADMIN ================= */
+        .admin-greeting { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3,4,94,0.98); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .admin-greeting.active { opacity: 1; pointer-events: auto; }
+        .admin-greeting h1 { color: var(--neon-red); font-size: 5rem; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0 0 30px var(--neon-red); animation: scalePulse 1.5s infinite alternate ease-in-out; text-align: center;}
+        @keyframes scalePulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* ================= HERO E CAROSELLI ================= */
+        .hero { height: 80vh; background: linear-gradient(rgba(3, 4, 94, 0.5), rgba(0, 119, 182, 0.5)), url('sfondo.jpg') center/cover no-repeat; display: flex; justify-content: center; align-items: center; text-align: center; }
+        .brand-container { position: relative; display: inline-block; }
+        .brand-title { font-size: 6rem; color: var(--white); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); transition: transform 0.4s ease; cursor: pointer; }
+        .brand-title:hover { transform: scale(1.05); }
+        .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--padel-blue); color: var(--white); padding: 12px 24px; border-radius: 8px; font-size: 1.2rem; font-weight: 700; opacity: 0; visibility: hidden; transition: all 0.3s ease; white-space: nowrap; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -10px; border-width: 10px; border-style: solid; border-color: var(--padel-blue) transparent transparent transparent; }
+        .brand-container:hover .tooltip { opacity: 1; visibility: visible; bottom: 130%; }
+
+        .section-title { text-align: center; margin: 60px 0 30px; font-size: 2.5rem; color: var(--dark-blue); text-transform: uppercase; }
+        .carousel-wrapper { width: 100%; overflow: hidden; padding: 20px 0 40px; background: var(--bg-gray); }
+        .carousel-track { display: flex; width: max-content; gap: 30px; padding: 0 15px; animation: scroll-belt 20s linear infinite; }
+        .carousel-track:hover { animation-play-state: paused; }
+        @keyframes scroll-belt { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .product-card { width: 280px; background: var(--white); border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); padding: 20px; position: relative; text-align: center; transition: transform 0.4s ease, box-shadow 0.4s ease; cursor: pointer; }
+        .product-card:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+        .product-img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 15px; }
+        .product-name { font-weight: 700; margin-bottom: 10px; font-size: 1.1rem;}
+        .product-price { color: var(--padel-blue); font-size: 1.3rem; font-weight: 900; }
+        .badge-new { position: absolute; top: -10px; right: -10px; background: #111; color: var(--neon-red); font-weight: 900; text-transform: uppercase; padding: 8px 15px; border-radius: 5px; border: 1px solid var(--neon-red); box-shadow: 0 0 10px var(--neon-red), inset 0 0 5px var(--neon-red); text-shadow: 0 0 5px var(--neon-red), 0 0 10px #ffaaaa; transform: rotate(5deg); z-index: 5; }
+
+        /* ================= SEZIONE CHI SIAMO (Full Width Sfondo Azzurro) ================= */
+        .about-section-wrapper {
+            background: linear-gradient(135deg, #e0f7fa, #a8dadc);
+            width: 100%;
+            padding: 100px 0;
+            margin: 50px 0;
+            overflow: hidden;
+        }
+        
+        .about-section { 
+            display: flex; align-items: center; justify-content: space-between; 
+            max-width: 1400px; margin: 0 auto; padding: 0 50px;
+        }
+        
+        .about-content { width: 45%; }
+        .about-content h2 { font-size: 4rem; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 20px; }
+        .about-content p { font-size: 1.15rem; line-height: 1.8; color: var(--dark-blue); text-align: justify; font-weight: 500;}
+        
+        .about-slider { 
+            width: 50%; height: 600px;
+            position: relative; display: flex; align-items: center; justify-content: center; 
+        }
+        
+        .slide { 
+            position: absolute; width: 350px; height: 500px;
+            object-fit: cover; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); 
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            border: 5px solid var(--white); background-color: var(--white);
+        }
+        
+        .slide-prev { transform: translateX(-65%) scale(0.85); z-index: 1; opacity: 0.6; filter: blur(3px); }
+        .slide-active { transform: translateX(0) scale(1.15); z-index: 3; opacity: 1; box-shadow: 0 30px 60px rgba(0,119,182,0.5); border-color: var(--padel-blue); }
+        .slide-next { transform: translateX(65%) scale(0.85); z-index: 1; opacity: 0.6; filter: blur(3px); }
+
+        /* ================= SEZIONE CONTATTI ================= */
+        .contact-section { padding: 80px 50px; max-width: 1000px; margin: 0 auto 100px; text-align: center; }
+        .contact-section p { font-size: 1.15rem; color: #555; margin-bottom: 40px; }
+        
+        .contact-form { 
+            background: var(--white); padding: 50px; border-radius: 20px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08); 
+            display: flex; flex-direction: column; gap: 20px; text-align: left; 
+        }
+        .form-row { display: flex; gap: 20px; }
+        .contact-form input, .contact-form textarea { 
+            width: 100%; padding: 18px; border: 2px solid #eee; border-radius: 10px; 
+            font-family: inherit; font-size: 1rem; transition: 0.3s; background: #fdfdfd;
+        }
+        .contact-form input:focus, .contact-form textarea:focus { border-color: var(--padel-blue); outline: none; background: var(--white); }
+        .contact-form textarea { resize: vertical; min-height: 180px; }
+        
+        .contact-form button { 
+            background: var(--padel-blue); color: var(--white); border: none; 
+            padding: 18px 30px; border-radius: 10px; font-size: 1.2rem; font-weight: 900; 
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,119,182,0.3);
+        }
+        .contact-form button:hover { background: var(--dark-blue); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,119,182,0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY ANIMAZIONE ADMIN -->
+    <div id="adminGreeting" class="admin-greeting">
+        <h1>Benvenuto Capo.</h1>
+    </div>
+
+    <!-- MODALE CONFERMA LOGOUT -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="confirm-box">
+            <h2>Disconnessione</h2>
+            <p>Sei sicuro di voler uscire dal tuo account?</p>
+            <div class="btn-group">
+                <button class="btn-no" onclick="closeLogoutModal()">Annulla</button>
+                <button class="btn-yes" onclick="confirmLogout()">Sì, Esci</button>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-side">
+            <!-- Icona Utente spostata qui, affianco a Home -->
+            <div class="profile-container">
+                <a href="login.html" class="icon-btn" id="profile-link" title="Area Personale">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </a>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <!-- Iniettato dal JS -->
+                </div>
+            </div>
+
+            <a href="index.html" style="color: var(--padel-light);">Home</a>
+            <a href="prodotti.html">Prodotti</a>
+        </div>
+        
+        <div class="logo">
+            <a href="index.html"><img src="logononaggiustato-removebg-preview.png" alt="Infinite Padel Logo"></a>
+        </div>
+        
+        <div class="nav-side">
+            <a href="#chisiamo">Chi Siamo</a>
+            <a href="#contatti">Contatti</a>
+
+            <!-- Icona Carrello (Da sola a destra) -->
+            <a href="carrello.html" class="icon-btn" title="Vai al Carrello">
+                <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <span class="cart-badge" id="badge-count">0</span>
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="brand-container">
+            <a href="prodotti.html">
+                <div class="tooltip">Vedi i nostri prodotti</div>
+                <h1 class="brand-title">Infinite Padel</h1>
+            </a>
+        </div>
+    </header>
+
+    <section>
+        <h2 class="section-title">Gli arrivi di questo mese</h2>
+        <div class="carousel-wrapper">
+            <div class="carousel-track">
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="racchetta.png"> <h3 class="product-name">Pala Infinite Pro</h3><p class="product-price">€ 249.99</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="borsa.png"> <h3 class="product-name">Paletero Tour 50L</h3><p class="product-price">€ 85.00</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="palline.png"> <h3 class="product-name">Tubo Palline Pro</h3><p class="product-price">€ 7.50</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="overgrip.png"> <h3 class="product-name">Overgrip Comfort</h3><p class="product-price">€ 8.50</p></div>
+                
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="racchetta.png"> <h3 class="product-name">Pala Infinite Pro</h3><p class="product-price">€ 249.99</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="borsa.png"> <h3 class="product-name">Paletero Tour 50L</h3><p class="product-price">€ 85.00</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="palline.png"> <h3 class="product-name">Tubo Palline Pro</h3><p class="product-price">€ 7.50</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><div class="badge-new">Nuovo</div><img class="product-img" src="overgrip.png"> <h3 class="product-name">Overgrip Comfort</h3><p class="product-price">€ 8.50</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="section-title">Gli articoli più venduti</h2>
+        <div class="carousel-wrapper">
+            <div class="carousel-track" style="animation-direction: reverse; animation-duration: 25s;">
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="racchetta.png"><h3 class="product-name">Pala Power Attack</h3><p class="product-price">€ 210.00</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="palline.png"><h3 class="product-name">Tubo Palline Master</h3><p class="product-price">€ 6.50</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="borsa.png"><h3 class="product-name">Zaino Padel Compact</h3><p class="product-price">€ 45.00</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="overgrip.png"><h3 class="product-name">Box Overgrip (12pz)</h3><p class="product-price">€ 25.00</p></div>
+                
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="racchetta.png"><h3 class="product-name">Pala Power Attack</h3><p class="product-price">€ 210.00</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="palline.png"><h3 class="product-name">Tubo Palline Master</h3><p class="product-price">€ 6.50</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="borsa.png"><h3 class="product-name">Zaino Padel Compact</h3><p class="product-price">€ 45.00</p></div>
+                <div class="product-card" onclick="window.location.href='prodotti.html'"><img class="product-img" src="overgrip.png"><h3 class="product-name">Box Overgrip (12pz)</h3><p class="product-price">€ 25.00</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHI SIAMO (Sfondo Azzurro) -->
+    <div class="about-section-wrapper" id="chisiamo">
+        <section class="about-section">
+            <div class="about-content">
+                <h2>Chi Siamo?</h2>
+                <p>
+                    Noi di Infinite Padel non siamo solo un'azienda, ma una vera e propria famiglia accomunata dalla passione incondizionata per questo sport straordinario. Nati sui campi e cresciuti tra pareti di vetro, conosciamo perfettamente le esigenze di ogni giocatore, dal principiante assoluto al professionista più esigente. 
+                    <br><br>
+                    Il nostro obiettivo principale è fornirti attrezzature di altissima qualità. Selezioniamo con cura maniacale i migliori marchi, i design più innovativi e i materiali più performanti presenti sul mercato. Crediamo fermamente che ogni dettaglio faccia la differenza durante un match, per questo poniamo un'attenzione totale nell'assistenza al cliente, guidandoti passo dopo passo nella scelta della pala, della borsa o dell'accessorio perfetto per massimizzare il tuo stile di gioco. 
+                    <br><br>
+                    Non ci limitiamo a vendere semplici prodotti, ma desideriamo accompagnarti nel tuo percorso di crescita sportiva, offrendoti supporto, competenza e una dedizione che va ben oltre il semplice acquisto. Con Infinite Padel, entri a far parte di una community esclusiva dove performance, stile e innovazione si incontrano per regalarti un'esperienza in campo senza precedenti.
+                </p>
+            </div>
+            <div class="about-slider">
+                <img src="atleta.jpg" class="slide slide-prev" alt="Atleta Padel">
+                <img src="atleta1.jpg" class="slide slide-active" alt="Atleta Padel 1">
+                <img src="atleta2.jpg" class="slide slide-next" alt="Atleta Padel 2">
+            </div>
+        </section>
+    </div>
+
+    <!-- CONTATTI (Collegato a Formspree) -->
+    <section id="contatti" class="contact-section">
+        <h2 class="section-title">Contattaci</h2>
+        <p>Hai dubbi su quale racchetta scegliere o domande su un ordine? Compila il modulo qui sotto e ti risponderemo il prima possibile!</p>
+        
+        <!-- Form aggiornato con il link Formspree -->
+        <form class="contact-form" action="https://formspree.io/f/xkoynnej" method="POST">
+            <div class="form-row">
+                <input type="text" name="Nome" placeholder="Il tuo Nome e Cognome" required style="width: 50%;">
+                <input type="email" name="email" placeholder="La tua Email" required style="width: 50%;">
+            </div>
+            <input type="text" name="Oggetto" placeholder="Oggetto del messaggio" required>
+            <textarea name="message" placeholder="Come possiamo aiutarti? Scrivi qui il tuo messaggio..." required></textarea>
+            <button type="submit">Invia Messaggio</button>
+        </form>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animazione Capo
+            if(localStorage.getItem('show_admin_greeting') === 'true') {
+                const greeting = document.getElementById('adminGreeting');
+                greeting.classList.add('active');
+                setTimeout(() => {
+                    greeting.classList.remove('active');
+                    localStorage.removeItem('show_admin_greeting');
+                }, 3000);
+            }
+
+            checkProfile();
+            startAboutSlider();
+
+            const cart = JSON.parse(localStorage.getItem('infinite_cart')) || [];
+            document.getElementById('badge-count').innerText = cart.length;
+
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Ignora i bottoni formspree, form o i link con "#" che non indicano un cambio pagina HTML
+                    if (this.href && !this.href.includes('#') && this.target !== '_blank' && !this.classList.contains('logout-btn')) {
+                        e.preventDefault();
+                        const targetUrl = this.href;
+                        document.body.classList.add('fade-out');
+                        setTimeout(() => { window.location.href = targetUrl; }, 400);
+                    }
+                });
+            });
+        });
+
+        // ================= GESTIONE PROFILO =================
+        function checkProfile() {
+            const loggedInUser = localStorage.getItem('infinite_logged_in');
+            const dropdown = document.getElementById('profile-dropdown');
+            const profileLink = document.getElementById('profile-link');
+
+            if(loggedInUser) {
+                profileLink.href = "javascript:void(0)";
+                let usersDB = JSON.parse(localStorage.getItem('infinite_users_db')) || [];
+                let u = usersDB.find(x => x.username === loggedInUser);
+                
+                if(u) {
+                    dropdown.innerHTML = `
+                        <p>Nome: <strong>${u.nome}</strong></p>
+                        <p>Cognome: <strong>${u.cognome}</strong></p>
+                        <p>Utente: <strong>${u.username}</strong></p>
+                        <button class="logout-btn" onclick="askLogout()">Disconnetti</button>
+                    `;
+                }
+            } else {
+                dropdown.innerHTML = `
+                    <p style="text-align:center; font-size:1rem; margin-bottom:10px;">Non sei connesso</p>
+                    <a href="login.html" style="background:var(--padel-blue); color:white; padding:10px; text-align:center; border-radius:5px; font-weight:bold; font-size:0.9rem;">Accedi ora</a>
+                `;
+            }
+        }
+
+        function askLogout() { document.getElementById('logoutModal').classList.add('active'); }
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+        function confirmLogout() { localStorage.removeItem('infinite_logged_in'); window.location.reload(); }
+
+        // ================= SLIDER 3D CHI SIAMO =================
+        function startAboutSlider() {
+            const slides = document.querySelectorAll('.slide');
+            if(slides.length === 0) return;
+            
+            let currentIndex = 1; 
+            setInterval(() => {
+                slides.forEach(s => s.classList.remove('slide-prev', 'slide-active', 'slide-next'));
+                currentIndex = (currentIndex + 1) % slides.length;
+                let prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+                let nextIndex = (currentIndex + 1) % slides.length;
+                
+                slides[prevIndex].classList.add('slide-prev');
+                slides[currentIndex].classList.add('slide-active');
+                slides[nextIndex].classList.add('slide-next');
+            }, 3000); 
+        }
+    </script>
+</body>
+</html>
